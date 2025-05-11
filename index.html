@@ -90,64 +90,75 @@
     </div>
 
     <script>
-        const items = {
-          'clilies': {
-            qtyEl: document.getElementById('chillies-qty'),
-            totalEl: document.getElementById('clilies-total'),
-            unitPrice: 59
-          },
-          'siasid': {
-            qtyEl: document.getElementById('siasid-qty'),
-            totalEl: document.getElementById('siasid-total'),
-            unitPrice: 329
-          }
-        };
-      
-        const totalEl = document.getElementById('388');
-      
-        function updateTotal() {
-          let total = 0;
-          for (const key in items) {
-            const item = items[key];
-            total += parseInt(item.totalEl.textContent || '0');
-          }
-          totalEl.textContent = total;
+      // Initial cart data
+      const cart = {
+        clilies: {
+          qty: 1,
+          price: 59,
+          qtyEl: document.getElementById("chillies-qty"),
+          totalEl: document.getElementById("clilies-total"),
+          plusBtn: document.getElementById("clilies-plus"),
+          minusBtn: document.getElementById("clilies-minus"),
+          removeBtn: document.getElementById("clilies-remove"),
+          container: document.getElementById("clilies-remove").closest(".flex")
+        },
+        siasid: {
+          qty: 1,
+          price: 329,
+          qtyEl: document.getElementById("siasid-qty"),
+          totalEl: document.getElementById("siasid-total"),
+          plusBtn: document.getElementById("siasid-plus"),
+          minusBtn: document.getElementById("siasid-minus"),
+          removeBtn: document.getElementById("siasid-remove"),
+          container: document.getElementById("siasid-remove").closest(".flex")
         }
-      
-        function updateItem(key, delta) {
-          const item = items[key];
-          let qty = parseInt(item.qtyEl.textContent || '1');
-          qty += delta;
-          if (qty < 1) qty = 1;
-          item.qtyEl.textContent = qty;
-          item.totalEl.textContent = item.unitPrice * qty;
-          updateTotal();
+      };
+    
+      const totalPriceEl = document.getElementById("388");
+    
+      function updateItemTotal(key) {
+        const item = cart[key];
+        item.totalEl.textContent = item.qty * item.price;
+      }
+    
+      function updateCartTotal() {
+        let total = 0;
+        for (let key in cart) {
+          total += cart[key].qty * cart[key].price;
         }
-      
-        // Bind events for Chillies
-        document.getElementById('clilies-plus').addEventListener('click', () => updateItem('clilies', 1));
-        document.getElementById('clilies-minus').addEventListener('click', () => updateItem('clilies', -1));
-        document.getElementById('clilies-remove').addEventListener('click', () => {
-          document.getElementById('clilies-remove').closest('.flex').remove();
-          items['clilies'].totalEl.textContent = '0';
-          updateTotal();
-        });
-      
-        // Bind events for Cardamom
-        document.getElementById('siasid-plus').addEventListener('click', () => updateItem('siasid', 1));
-        document.getElementById('siasid-minus').addEventListener('click', () => updateItem('siasid', -1));
-        document.getElementById('siasid-remove').addEventListener('click', () => {
-          document.getElementById('siasid-remove').closest('.flex').remove();
-          items['siasid'].totalEl.textContent = '0';
-          updateTotal();
-        });
+        totalPriceEl.textContent = total;
+      }
+    
+      function handleQuantityChange(key, delta) {
+        const item = cart[key];
+        item.qty = Math.max(1, item.qty + delta); // Prevent 0 or negative qty
+        item.qtyEl.textContent = item.qty;
+        updateItemTotal(key);
+        updateCartTotal();
+      }
+    
+      function handleRemove(key) {
+        const item = cart[key];
+        item.container.remove();
+        delete cart[key];
+        updateCartTotal();
+      }
+    
+      // Attach event listeners
+      for (let key in cart) {
+        const item = cart[key];
+    
+        item.plusBtn.addEventListener("click", () => handleQuantityChange(key, 1));
+        item.minusBtn.addEventListener("click", () => handleQuantityChange(key, -1));
+        item.removeBtn.addEventListener("click", () => handleRemove(key));
+      }
 
         document.getElementById('place-order').addEventListener('click', () => {
         window.location.href = 'thankyou.html';
         });
-      
-        // Initial calculation
-        updateTotal();
-      </script>
+    
+      // Initial total update
+      updateCartTotal();
+    </script>
 </body>
 </html>
